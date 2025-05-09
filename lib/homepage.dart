@@ -3,12 +3,19 @@ import 'package:intl/intl.dart'; // for date formatting
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'main.dart'; // Import to access the supabase client
 import 'signin.dart';
+import 'account.dart'; // Import to access the AccountPage
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'transitions.dart'; // Import for custom transitions
 
 class HomePage extends StatefulWidget {
   final bool isDarkMode;
   final VoidCallback toggleTheme;
 
-  const HomePage({Key? key, required this.isDarkMode, required this.toggleTheme}) : super(key: key);
+  const HomePage({
+    Key? key,
+    required this.isDarkMode,
+    required this.toggleTheme,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,11 +25,11 @@ class _HomePageState extends State<HomePage> {
   String _userName = "User";
   String _userEmail = "";
   bool _isLoading = true;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    // Check authentication status first
     _checkAuthStatus();
     _loadUserProfile();
   }
@@ -30,74 +37,60 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkAuthStatus() async {
     final session = supabase.auth.currentSession;
     if (session == null) {
-      // Not authenticated, go back to login
       debugPrint('User is not authenticated, redirecting to sign in');
-      if (mounted) {
-        _navigateToSignIn();
-      }
-      return;
-    }
-    
-    // Set up a listener for auth state changes
-    supabase.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      if (event == AuthChangeEvent.signedOut) {
-        debugPrint('Auth state changed: User signed out');
-        if (mounted) {
+      _navigateToSignIn();
+    } else {
+      supabase.auth.onAuthStateChange.listen((data) {
+        final AuthChangeEvent event = data.event;
+        if (event == AuthChangeEvent.signedOut) {
+          debugPrint('Auth state changed: User signed out');
           _navigateToSignIn();
         }
-      }
-    });
+      });
+    }
   }
 
   void _navigateToSignIn() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => SignInPage(
-          onSignInSuccess: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  isDarkMode: widget.isDarkMode,
-                  toggleTheme: widget.toggleTheme,
-                ),
-              ),
-            );
-          },
-        ),
+        builder:
+            (context) => SignInPage(
+              onSignInSuccess: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => HomePage(
+                          isDarkMode: widget.isDarkMode,
+                          toggleTheme: widget.toggleTheme,
+                        ),
+                  ),
+                );
+              },
+            ),
       ),
     );
   }
 
   Future<void> _loadUserProfile() async {
     setState(() => _isLoading = true);
-    
     try {
-      // Get current user
       final User? user = supabase.auth.currentUser;
-      
+
       if (user != null) {
-        // Get profile data
-        final profileData = await supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .single();
-        
+        final profileData =
+            await supabase.from('profiles').select().eq('id', user.id).single();
+
         setState(() {
           _userName = profileData['name'] ?? 'User';
           _userEmail = user.email ?? '';
         });
       }
     } catch (e) {
-      // Handle error
       debugPrint('Error loading profile: $e');
-      // Still show something to the user
-      final user = supabase.auth.currentUser;
-      if (user != null && mounted) {
+      if (mounted) {
         setState(() {
           _userName = 'User';
-          _userEmail = user.email ?? '';
+          _userEmail = 'Email not found';
         });
       }
     } finally {
@@ -115,7 +108,6 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       debugPrint('Error signing out: $e');
-      // Show error to user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -127,6 +119,30 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _onNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    // Add your own navigation logic here
+    if (index == 0) {
+      //Already on Home
+    } else if (index == 1) {
+      // Navigator.pushReplacementNamed(context, '/chat');
+    } else if (index == 2) {
+      //Stats
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        fadeTransition(
+          AccountPage(
+            isDarkMode: widget.isDarkMode,
+            toggleTheme: widget.toggleTheme,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
@@ -135,20 +151,14 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Combined Calendar, Profile, and Search Bar Section
             ClipRRect(
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
               child: Container(
-                color: Colors.lightGreen[100], // Light green background
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  24,
-                  16,
-                  16,
-                ), // Increased top padding
+                color: Colors.lightGreen[100],
+                padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
                 child: Column(
                   children: [
                     Row(
@@ -156,26 +166,32 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color: Colors.deepOrange,
-                            ),
+                            Icon(Icons.today, color: Colors.brown),
                             SizedBox(width: 8),
-                            Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 14,
-                              ), // Reduced font size
-                            ),
+                            Text(formattedDate, style: TextStyle(fontSize: 14)),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.notifications_none, size: 28),
-                            SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: _signOut,
-                              child: Icon(Icons.logout, size: 24),
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.notifications_none,
+                                size: 24,
+                                color: Colors.black87,
+                              ),
                             ),
                           ],
                         ),
@@ -183,14 +199,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 12),
                     Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start, // Align items to the start
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
                           radius: 28,
                           backgroundColor: Colors.brown[700],
                           child: Text(
-                            _isLoading ? '?' : _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U',
+                            _isLoading
+                                ? '?'
+                                : _userName.isNotEmpty
+                                ? _userName[0].toUpperCase()
+                                : 'U',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -201,16 +220,14 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(width: 12),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                              top: 6.0,
-                            ), // Add a little top padding
+                            padding: const EdgeInsets.only(top: 6.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   _isLoading ? 'Loading...' : _userName,
                                   style: TextStyle(
-                                    fontSize: 18, // Reduced font size
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -249,7 +266,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16), // Increased spacing before search bar
+                    SizedBox(height: 16),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
@@ -274,10 +291,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-
             SizedBox(height: 12),
-
-            // Chatbot Section
             Container(
               margin: EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
@@ -312,30 +326,19 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-
-      // Bottom Navigation Bar with Curves
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              label: 'Chat',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart),
-              label: 'Stats',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
-        ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _selectedIndex,
+        height: 60.0,
+        color: Colors.lightGreen,
+        backgroundColor: Colors.transparent,
+        animationDuration: const Duration(milliseconds: 300),
+        items: const <Widget>[
+          Icon(Icons.home, size: 30, color: Colors.white),
+          Icon(Icons.chat, size: 30, color: Colors.white),
+          Icon(Icons.stacked_bar_chart, size: 30, color: Colors.white),
+          Icon(Icons.person, size: 30, color: Colors.white),
+        ],
+        onTap: _onNavTap,
       ),
     );
   }

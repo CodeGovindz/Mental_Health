@@ -32,7 +32,7 @@ class _SignInPageState extends State<SignInPage> {
     if (session != null) {
       // User is already signed in
       debugPrint('User is already authenticated: ${session.user.email}');
-      
+
       // Ensure we have profile data loaded before navigating
       try {
         await supabase
@@ -40,7 +40,7 @@ class _SignInPageState extends State<SignInPage> {
             .select()
             .eq('id', session.user.id)
             .single();
-            
+
         if (mounted) {
           widget.onSignInSuccess();
         }
@@ -89,7 +89,7 @@ class _SignInPageState extends State<SignInPage> {
               duration: Duration(seconds: 2),
             ),
           );
-          
+
           // Call the callback to navigate to HomePage
           widget.onSignInSuccess();
         }
@@ -101,7 +101,9 @@ class _SignInPageState extends State<SignInPage> {
       setState(() => _errorMessage = error.message);
     } catch (error) {
       debugPrint('Unexpected error during sign in: $error');
-      setState(() => _errorMessage = 'An unexpected error occurred. Please try again.');
+      setState(
+        () => _errorMessage = 'An unexpected error occurred. Please try again.',
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -294,30 +296,31 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   minimumSize: const Size(double.infinity, 55),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            "Sign In",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
                           ),
-                          SizedBox(width: 10),
-                          Icon(Icons.arrow_forward, color: Colors.white),
-                        ],
-                      ),
+                        )
+                        : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              "Sign In",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Icon(Icons.arrow_forward, color: Colors.white),
+                          ],
+                        ),
               ),
             ),
             Padding(
@@ -407,9 +410,7 @@ class _SignInPageState extends State<SignInPage> {
         shape: BoxShape.circle,
         border: Border.all(color: color, width: 1),
       ),
-      child: Center(
-        child: FaIcon(icon, color: color, size: 20),
-      ),
+      child: Center(child: FaIcon(icon, color: color, size: 20)),
     );
   }
 }
