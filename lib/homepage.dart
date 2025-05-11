@@ -6,6 +6,7 @@ import 'signin.dart';
 import 'account.dart'; // Import to access the AccountPage
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'transitions.dart'; // Import for custom transitions
+import 'cameraaudio.dart'; // Import to access the CameraAudioPage
 
 class HomePage extends StatefulWidget {
   final bool isDarkMode;
@@ -127,6 +128,15 @@ class _HomePageState extends State<HomePage> {
     if (index == 0) {
       //Already on Home
     } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        fadeTransition(
+          CameraAudioPage(
+            isDarkMode: widget.isDarkMode,
+            toggleTheme: widget.toggleTheme,
+          ),
+        ),
+      );
       // Navigator.pushReplacementNamed(context, '/chat');
     } else if (index == 2) {
       //Stats

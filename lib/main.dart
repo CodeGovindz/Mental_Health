@@ -2,15 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app_links/app_links.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'homepage.dart';
 import 'signin.dart';
+import 'permissions_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Load environment variables
+  await dotenv.load(fileName: '.env');
+  
   await Supabase.initialize(
-    url: 'https://cqfwjwrhhcctazigevno.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZndqd3JoaGNjdGF6aWdldm5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTE2ODQsImV4cCI6MjA2MTMyNzY4NH0.sEu1Xeni4rw3g9vaKI1nEtfZca5CFvdiexPOmLTwJ-8',
+    url: dotenv.env['SUPABASE_URL'] ?? 'https://cqfwjwrhhcctazigevno.supabase.co',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZndqd3JoaGNjdGF6aWdldm5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTE2ODQsImV4cCI6MjA2MTMyNzY4NH0.sEu1Xeni4rw3g9vaKI1nEtfZca5CFvdiexPOmLTwJ-8',
     debug: true,
   );
   
@@ -32,13 +38,13 @@ class _MyAppState extends State<MyApp> {
   late AppLinks _appLinks;
   bool _initialURILinkHandled = false;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  bool _permissionsChecked = false;
 
   @override
   void initState() {
     super.initState();
     initializeDeepLinks();
-    // Check if user is already signed in
-    _checkAndNavigateToHome();
+    // We'll check permissions first, then auth status
   }
   
   Future<void> _checkAndNavigateToHome() async {
@@ -57,6 +63,19 @@ class _MyAppState extends State<MyApp> {
         builder: (context) => HomePage(
           isDarkMode: _isDarkMode,
           toggleTheme: _toggleTheme,
+        ),
+      ),
+    );
+  }
+
+  // Navigate to sign in after permissions
+  void _navigateToSignIn() {
+    _navigatorKey.currentState?.pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => SignInPage(
+          onSignInSuccess: () {
+            _navigateToHome();
+          },
         ),
       ),
     );
@@ -124,6 +143,15 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  // Handle permission flow completion
+  void _onPermissionsGranted() {
+    setState(() {
+      _permissionsChecked = true;
+    });
+    // After permissions are granted, proceed with auth flow
+    _checkAndNavigateToHome();
+  }
+
   @override
   Widget build(BuildContext context) {
     final baseTheme = _isDarkMode ? ThemeData.dark() : ThemeData.light();
@@ -136,12 +164,19 @@ class _MyAppState extends State<MyApp> {
         textTheme: GoogleFonts.urbanistTextTheme(baseTheme.textTheme),
       ),
       home: Builder(
-        builder:
-            (context) => SignInPage(
-              onSignInSuccess: () {
-                _navigateToHome();
-              },
-            ),
+        builder: (context) {
+          // First check if we've gone through permissions flow
+          if (!_permissionsChecked) {
+            return PermissionsScreen(onPermissionsGranted: _onPermissionsGranted);
+          }
+          
+          // If permissions are checked, proceed with normal auth flow
+          return SignInPage(
+            onSignInSuccess: () {
+              _navigateToHome();
+            },
+          );
+        },
       ),
     );
   }
