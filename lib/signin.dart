@@ -90,8 +90,16 @@ class _SignInPageState extends State<SignInPage> {
             ),
           );
 
-          // Call the callback to navigate to HomePage
-          widget.onSignInSuccess();
+          // Navigate to HomePage and clear the stack
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => HomePage(
+                isDarkMode: false, // You can pass the correct value if needed
+                toggleTheme: () {}, // You can pass the correct function if needed
+              ),
+            ),
+            (route) => false,
+          );
         }
       } else {
         setState(() => _errorMessage = 'Sign in failed. Please try again.');

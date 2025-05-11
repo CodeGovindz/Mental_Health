@@ -52,23 +52,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _navigateToSignIn() {
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder:
             (context) => SignInPage(
-              onSignInSuccess: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder:
-                        (context) => HomePage(
-                          isDarkMode: widget.isDarkMode,
-                          toggleTheme: widget.toggleTheme,
-                        ),
-                  ),
-                );
-              },
+              onSignInSuccess: () {},
             ),
       ),
+      (route) => false,
     );
   }
 

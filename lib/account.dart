@@ -65,8 +65,11 @@ class _AccountPageState extends State<AccountPage> {
     try {
       await supabase.auth.signOut();
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => SignInPage(onSignInSuccess: () {})),
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => SignInPage(onSignInSuccess: () {}),
+          ),
+          (route) => false,
         );
       }
     } catch (e) {
