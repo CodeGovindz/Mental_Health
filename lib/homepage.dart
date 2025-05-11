@@ -7,6 +7,7 @@ import 'account.dart'; // Import to access the AccountPage
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'transitions.dart'; // Import for custom transitions
 import 'cameraaudio.dart'; // Import to access the CameraAudioPage
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   final bool isDarkMode;
@@ -146,6 +147,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     String formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
 
     return Scaffold(
@@ -159,7 +166,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Container(
                 color: Colors.lightGreen[100],
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
+                padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
                 child: Column(
                   children: [
                     Row(

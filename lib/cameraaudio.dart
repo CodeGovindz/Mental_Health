@@ -8,6 +8,7 @@ import 'permissions_handler.dart';
 import 'transitions.dart';
 import 'homepage.dart';
 import 'account.dart';
+import 'package:flutter/services.dart';
 
 class CameraAudioPage extends StatefulWidget {
   final bool isDarkMode;
@@ -36,6 +37,13 @@ class _CameraAudioPageState extends State<CameraAudioPage> {
     _audioPlayer = AudioPlayer();
     _loadAudioFile();
     _checkPermissions();
+    // Set the status bar color to light green
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   Future<void> _checkPermissions() async {
@@ -190,6 +198,12 @@ class _CameraAudioPageState extends State<CameraAudioPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     final isDark = widget.isDarkMode;
     return Scaffold(
       appBar: AppBar(

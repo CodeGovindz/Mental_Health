@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'signin.dart';
 import 'main.dart'; // Import to access the supabase client
+import 'package:flutter/services.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -20,6 +21,18 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false; // Added loading state
   String? _errorMessage; // Added error message
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the status bar color to light green
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+  }
 
   void _validateEmail(String value) {
     setState(() {
@@ -129,6 +142,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SingleChildScrollView(

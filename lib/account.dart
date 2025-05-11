@@ -5,6 +5,8 @@ import 'main.dart';
 import 'signin.dart';
 import 'homepage.dart';
 import 'transitions.dart';
+import 'package:flutter/services.dart';
+import 'edit_profile.dart';
 
 class AccountPage extends StatefulWidget {
   final bool isDarkMode;
@@ -30,6 +32,13 @@ class _AccountPageState extends State<AccountPage> {
   @override
   void initState() {
     super.initState();
+    // Set the status bar color to light green
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     _loadUserProfile();
   }
 
@@ -82,6 +91,21 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _navigateToEditProfile() async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditProfilePage(
+          initialName: _userName,
+          initialEmail: _userEmail,
+        ),
+      ),
+    );
+    if (result == true) {
+      // Refresh profile after editing
+      _loadUserProfile();
+    }
+  }
+
   void _onNavTap(int index) {
     setState(() {
       _selectedIndex = index;
@@ -116,6 +140,12 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
@@ -216,9 +246,7 @@ class _AccountPageState extends State<AccountPage> {
                   ListTile(
                     leading: const Icon(Icons.edit),
                     title: const Text("Edit Profile"),
-                    onTap: () {
-                      // Future: Navigate to edit profile page
-                    },
+                    onTap: _navigateToEditProfile,
                   ),
                   ListTile(
                     leading: const Icon(Icons.settings),

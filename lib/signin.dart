@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'signup.dart';
 import 'homepage.dart'; // ✅ Import HomePage
 import 'main.dart'; // Import to access the supabase client
+import 'package:flutter/services.dart';
 
 class SignInPage extends StatefulWidget {
   final VoidCallback onSignInSuccess;
@@ -119,6 +120,12 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.lightGreen[100],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SingleChildScrollView(

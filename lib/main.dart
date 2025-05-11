@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'homepage.dart';
 import 'signin.dart';
 import 'permissions_screen.dart';
@@ -10,6 +11,14 @@ import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set the status bar color to light green
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.lightGreen[100],
+      statusBarIconBrightness: Brightness.dark, // For dark icons
+    ),
+  );
   
   // Load environment variables
   await dotenv.load(fileName: '.env');
