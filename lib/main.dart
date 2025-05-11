@@ -14,9 +14,22 @@ void main() async {
   // Load environment variables
   await dotenv.load(fileName: '.env');
   
+  // Get credentials from .env file
+  final url = dotenv.env['SUPABASE_URL'];
+  final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+  
+  // Check if credentials are available
+  if (url == null || anonKey == null) {
+    // In a real app, you might want to show a user-friendly error
+    // or use dummy values for development
+    debugPrint('ERROR: Missing Supabase credentials in .env file!');
+    debugPrint('Make sure .env file exists with SUPABASE_URL and SUPABASE_ANON_KEY');
+    return; // This will exit the app initialization
+  }
+  
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'],
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'],
+    url: url,
+    anonKey: anonKey,
     debug: true,
   );
   
