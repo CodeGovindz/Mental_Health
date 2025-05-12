@@ -8,6 +8,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'transitions.dart'; // Import for custom transitions
 import 'cameraaudio.dart'; // Import to access the CameraAudioPage
 import 'package:flutter/services.dart';
+import 'model_selection.dart'; // Import to access the ModelSelectionPage
 
 class HomePage extends StatefulWidget {
   final bool isDarkMode;
@@ -55,10 +56,7 @@ class _HomePageState extends State<HomePage> {
   void _navigateToSignIn() {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder:
-            (context) => SignInPage(
-              onSignInSuccess: () {},
-            ),
+        builder: (context) => SignInPage(onSignInSuccess: () {}),
       ),
       (route) => false,
     );
@@ -123,7 +121,7 @@ class _HomePageState extends State<HomePage> {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          CameraAudioPage(
+          ModeSelectionPage(
             isDarkMode: widget.isDarkMode,
             toggleTheme: widget.toggleTheme,
           ),
