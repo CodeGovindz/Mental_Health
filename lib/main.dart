@@ -194,9 +194,9 @@ class _MyAppState extends State<MyApp> {
           
           // If permissions are checked, proceed with normal auth flow
           return SignInPage(
-            onSignInSuccess: () {
-              _navigateToHome();
-            },
+              onSignInSuccess: () {
+                _navigateToHome();
+              },
           );
         },
       ),

@@ -7,6 +7,7 @@ import 'homepage.dart';
 import 'transitions.dart';
 import 'package:flutter/services.dart';
 import 'edit_profile.dart';
+import 'package:http/http.dart' as http;
 
 class AccountPage extends StatefulWidget {
   final bool isDarkMode;
@@ -26,6 +27,7 @@ class _AccountPageState extends State<AccountPage> {
   String _userName = "User";
   String _userEmail = "";
   bool _isLoading = true;
+  bool _isDeleting = false;
 
   int _selectedIndex = 3; // Account Index - 3
 
@@ -104,6 +106,101 @@ class _AccountPageState extends State<AccountPage> {
       // Refresh profile after editing
       _loadUserProfile();
     }
+  }
+
+  Future<void> _deleteAccount() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+    setState(() => _isDeleting = true);
+    try {
+      final response = await http.post(
+        Uri.parse('https://cqfwjwrhhcctazigevno.supabase.co/functions/v1/delete_user_account'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${supabase.auth.currentSession?.accessToken ?? ''}',
+        },
+        body: '{"user_id": "${user.id}"}',
+      );
+      if (response.statusCode == 200) {
+        await supabase.auth.signOut();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => SignInPage(onSignInSuccess: () {}),
+            ),
+            (route) => false,
+          );
+        }
+      } else {
+        throw Exception('Failed to delete account');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting account: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isDeleting = false);
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text('Do you really want to delete your account? This action cannot be undone.'),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    shadowColor: Colors.grey[400],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Colors.grey, width: 1.5),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[100],
+                    foregroundColor: Colors.red[900],
+                    elevation: 4,
+                    shadowColor: Colors.red[200],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Colors.red, width: 1.5),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: _isDeleting
+                      ? null
+                      : () async {
+                          Navigator.of(context).pop();
+                          await _deleteAccount();
+                        },
+                  child: _isDeleting
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Yes, Delete', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   void _onNavTap(int index) {
@@ -263,9 +360,7 @@ class _AccountPageState extends State<AccountPage> {
                   ListTile(
                     leading: const Icon(Icons.delete),
                     title: const Text("Delete Account"),
-                    onTap: () {
-                      // Future: Navigate to delete account page
-                    },
+                    onTap: _showDeleteAccountDialog,
                   ),
                 ],
               ),
