@@ -8,6 +8,7 @@ import 'transitions.dart';
 import 'package:flutter/services.dart';
 import 'edit_profile.dart';
 import 'package:http/http.dart' as http;
+import 'faq_screen.dart';
 
 class AccountPage extends StatefulWidget {
   final bool isDarkMode;
@@ -26,6 +27,8 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   String _userName = "User";
   String _userEmail = "";
+  DateTime? _userDob;
+  String? _avatarUrl;
   bool _isLoading = true;
   bool _isDeleting = false;
 
@@ -56,6 +59,10 @@ class _AccountPageState extends State<AccountPage> {
         setState(() {
           _userName = profile['name'] ?? 'User';
           _userEmail = user.email ?? '';
+          _userDob = profile['date_of_birth'] != null && profile['date_of_birth'] != ''
+              ? DateTime.tryParse(profile['date_of_birth'])
+              : null;
+          _avatarUrl = profile['avatar_url'] as String?;
         });
       }
     } catch (e) {
@@ -65,6 +72,8 @@ class _AccountPageState extends State<AccountPage> {
         setState(() {
           _userName = 'User';
           _userEmail = user.email ?? '';
+          _userDob = null;
+          _avatarUrl = null;
         });
       }
     } finally {
@@ -99,6 +108,7 @@ class _AccountPageState extends State<AccountPage> {
         builder: (context) => EditProfilePage(
           initialName: _userName,
           initialEmail: _userEmail,
+          initialDob: _userDob,
         ),
       ),
     );
@@ -235,6 +245,12 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  void _navigateToFAQ() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => FAQScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -258,114 +274,228 @@ class _AccountPageState extends State<AccountPage> {
         ],
         onTap: _onNavTap,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header with profile and theme toggle
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
+      body: Stack(
+        children: [
+          // Decorative background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: Container(
-                color: Colors.lightGreen[100],
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.brown[700],
-                      child: Text(
-                        _isLoading
-                            ? '?'
-                            : _userName.isNotEmpty
-                            ? _userName[0].toUpperCase()
-                            : 'U',
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+            ),
+          ),
+          Positioned(
+            top: -60,
+            left: -60,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: Colors.lightGreen[100]?.withOpacity(0.4),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -40,
+            right: -40,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.brown[100]?.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Profile Card
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: Colors.brown[700],
+                                borderRadius: BorderRadius.circular(16),
+                                image: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                    ? DecorationImage(
+                                        image: NetworkImage(_avatarUrl!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                              ),
+                              child: (_avatarUrl == null || _avatarUrl!.isEmpty)
+                                  ? Center(
+                                      child: Text(
+                                        _isLoading
+                                            ? '?'
+                                            : _userName.isNotEmpty
+                                                ? _userName[0].toUpperCase()
+                                                : 'U',
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _isLoading ? 'Loading...' : _userName,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _isLoading ? '' : _userEmail,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey[700],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (_userDob != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6.0),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.cake_outlined, size: 18, color: Colors.brown),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '${_userDob!.day.toString().padLeft(2, '0')}-${_userDob!.month.toString().padLeft(2, '0')}-${_userDob!.year}',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.brown[700],
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 400),
+                                transitionBuilder:
+                                    (child, animation) => RotationTransition(
+                                      turns: animation,
+                                      child: child,
+                                    ),
+                                child: widget.isDarkMode
+                                    ? const Icon(
+                                        Icons.dark_mode,
+                                        key: ValueKey('moon'),
+                                      )
+                                    : const Icon(
+                                        Icons.wb_sunny,
+                                        key: ValueKey('sun'),
+                                      ),
+                              ),
+                              onPressed: widget.toggleTheme,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _isLoading ? 'Loading...' : _userName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _isLoading ? '' : _userEmail,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  // Options List
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      children: [
+                        _optionCard(
+                          icon: Icons.edit,
+                          label: 'Edit Profile',
+                          onTap: _navigateToEditProfile,
+                          color: Colors.lightGreen[100],
+                        ),
+                        const SizedBox(height: 16),
+                        _optionCard(
+                          icon: Icons.settings,
+                          label: 'Settings',
+                          onTap: () {},
+                          color: Colors.blueGrey[50],
+                        ),
+                        const SizedBox(height: 16),
+                        _optionCard(
+                          icon: Icons.help_outline,
+                          label: 'FAQ',
+                          onTap: _navigateToFAQ,
+                          color: Colors.amber[50],
+                        ),
+                        const SizedBox(height: 16),
+                        _optionCard(
+                          icon: Icons.logout,
+                          label: 'Log Out',
+                          onTap: _signOut,
+                          color: Colors.orange[50],
+                        ),
+                        const SizedBox(height: 16),
+                        _optionCard(
+                          icon: Icons.delete,
+                          label: 'Delete Account',
+                          onTap: _showDeleteAccountDialog,
+                          color: Colors.red[50],
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        transitionBuilder:
-                            (child, animation) => RotationTransition(
-                              turns: animation,
-                              child: child,
-                            ),
-                        child:
-                            widget.isDarkMode
-                                ? const Icon(
-                                  Icons.dark_mode,
-                                  key: ValueKey('moon'),
-                                )
-                                : const Icon(
-                                  Icons.wb_sunny,
-                                  key: ValueKey('sun'),
-                                ),
-                      ),
-                      onPressed: widget.toggleTheme,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: const Text("Edit Profile"),
-                    onTap: _navigateToEditProfile,
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: const Text("Settings"),
-                    onTap: () {
-                      // Future: Navigate to settings page
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: const Text("Log Out"),
-                    onTap: _signOut,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.delete),
-                    title: const Text("Delete Account"),
-                    onTap: _showDeleteAccountDialog,
-                  ),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _optionCard({required IconData icon, required String label, required VoidCallback onTap, Color? color}) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+      color: color ?? Colors.white,
+      child: ListTile(
+        leading: Icon(icon, size: 28, color: Colors.brown[700]),
+        title: Text(
+          label,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+        ),
+        onTap: onTap,
+        trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
         ),
       ),
     );
