@@ -49,6 +49,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   http: ^1.1.0
   image_picker: ^1.0.7
+  audio_session: ^0.1.18
 
 dev_dependencies:
   flutter_test:
