@@ -6,14 +6,8 @@ import 'homepage.dart';
 import 'cameraaudio.dart';
 
 class ModeSelectionPage extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback toggleTheme;
-
-  const ModeSelectionPage({
-    Key? key,
-    required this.isDarkMode,
-    required this.toggleTheme,
-  }) : super(key: key);
+  final VoidCallback onOpenSettings;
+  const ModeSelectionPage({Key? key, required this.onOpenSettings}) : super(key: key);
 
   @override
   State<ModeSelectionPage> createState() => _ModeSelectionPageState();
@@ -31,10 +25,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          HomePage(
-            isDarkMode: widget.isDarkMode,
-            toggleTheme: widget.toggleTheme,
-          ),
+          HomePage(onOpenSettings: widget.onOpenSettings),
         ),
       );
     } else if (index == 1) {
@@ -45,10 +36,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          AccountPage(
-            isDarkMode: widget.isDarkMode,
-            toggleTheme: widget.toggleTheme,
-          ),
+          AccountPage(onOpenSettings: widget.onOpenSettings),
         ),
       );
     }
@@ -56,10 +44,28 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : null;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choose Interaction Mode'),
         centerTitle: true,
+        backgroundColor: isDark ? const Color(0xFF223D1B) : null,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
+        actions: [
+          IconButton(
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) => RotationTransition(turns: animation, child: child),
+              child: isDark
+                  ? const Icon(Icons.dark_mode, key: ValueKey('moon'), color: Colors.white)
+                  : const Icon(Icons.wb_sunny, key: ValueKey('sun'), color: Colors.black),
+            ),
+            onPressed: widget.onOpenSettings,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -70,11 +76,13 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
               onPressed: () {
                 // Navigate to ChatScreen
               },
-              icon: const Icon(Icons.chat),
-              label: const Text('Chat with Me'),
+              icon: Icon(Icons.chat, color: isDark ? Colors.white : Colors.black),
+              label: Text('Chat with Me', style: TextStyle(color: textColor)),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 textStyle: const TextStyle(fontSize: 18),
+                backgroundColor: cardColor,
+                foregroundColor: textColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -84,14 +92,13 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                   context,
                   fadeTransition(
                     VideoQuestionnairePage(
-                      isDarkMode: widget.isDarkMode,
-                      toggleTheme: widget.toggleTheme,
+                      onOpenSettings: widget.onOpenSettings,
                     ),
                   ),
                 );
                 // Navigate to VideoChatScreen
               },
-              icon: const Icon(Icons.videocam),
+              icon: Icon(Icons.videocam, color: Colors.white),
               label: const Text(
                 'Vi Talk',
                 style: TextStyle(color: Colors.white),
@@ -108,7 +115,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
         height: 60.0,
-        color: Colors.lightGreen,
+        color: isDark ? const Color(0xFF223D1B) : Colors.lightGreen,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 300),
         items: const <Widget>[
@@ -119,6 +126,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
         ],
         onTap: _onNavTap,
       ),
+      backgroundColor: bgColor,
     );
   }
 }

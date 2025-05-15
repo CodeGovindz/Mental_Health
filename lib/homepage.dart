@@ -11,14 +11,8 @@ import 'package:flutter/services.dart';
 import 'model_selection.dart'; // Import to access the ModelSelectionPage
 
 class HomePage extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback toggleTheme;
-
-  const HomePage({
-    Key? key,
-    required this.isDarkMode,
-    required this.toggleTheme,
-  }) : super(key: key);
+  final VoidCallback onOpenSettings;
+  const HomePage({Key? key, required this.onOpenSettings}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -56,7 +50,9 @@ class _HomePageState extends State<HomePage> {
   void _navigateToSignIn() {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (context) => SignInPage(onSignInSuccess: () {}),
+        builder: (context) => SignInPage(
+          onSignInSuccess: () {},
+        ),
       ),
       (route) => false,
     );
@@ -114,30 +110,22 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
-    // Add your own navigation logic here
     if (index == 0) {
       //Already on Home
     } else if (index == 1) {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          ModeSelectionPage(
-            isDarkMode: widget.isDarkMode,
-            toggleTheme: widget.toggleTheme,
-          ),
+          ModeSelectionPage(onOpenSettings: widget.onOpenSettings),
         ),
       );
-      // Navigator.pushReplacementNamed(context, '/chat');
     } else if (index == 2) {
       //Stats
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          AccountPage(
-            isDarkMode: widget.isDarkMode,
-            toggleTheme: widget.toggleTheme,
-          ),
+          AccountPage(onOpenSettings: widget.onOpenSettings),
         ),
       );
     }
@@ -145,10 +133,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : null;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.lightGreen[100],
-        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
     );
     String formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
@@ -158,13 +150,13 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
               child: Container(
-                color: Colors.lightGreen[100],
-                padding: EdgeInsets.fromLTRB(16, 10, 16, 16),
+                color: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                 child: Column(
                   children: [
                     Row(
@@ -172,38 +164,38 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.today, color: Colors.brown),
-                            SizedBox(width: 8),
-                            Text(formattedDate, style: TextStyle(fontSize: 14)),
+                            Icon(Icons.today, color: isDark ? Colors.white : Colors.brown),
+                            const SizedBox(width: 8),
+                            Text(formattedDate, style: TextStyle(fontSize: 14, color: textColor)),
                           ],
                         ),
                         Row(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDark ? Colors.white10 : Colors.white,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(0.3),
                                     spreadRadius: 1,
                                     blurRadius: 4,
-                                    offset: Offset(0, 2),
+                                    offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
                               child: Icon(
                                 Icons.notifications_none,
                                 size: 24,
-                                color: Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -216,115 +208,160 @@ class _HomePageState extends State<HomePage> {
                                 : _userName.isNotEmpty
                                 ? _userName[0].toUpperCase()
                                 : 'U',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 6.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _isLoading ? 'Loading...' : _userName,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _isLoading ? 'Loading...' : _userName,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
                                 ),
-                                SizedBox(height: 2),
-                                Text(
-                                  _isLoading ? '' : _userEmail,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[700],
-                                  ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _isLoading ? '' : _userEmail,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark ? Colors.white70 : Colors.grey[700],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ),
-                        IconButton(
-                          icon: AnimatedSwitcher(
-                            duration: Duration(milliseconds: 400),
-                            transitionBuilder:
-                                (child, animation) => RotationTransition(
-                                  turns: animation,
-                                  child: child,
-                                ),
-                            child:
-                                widget.isDarkMode
-                                    ? Icon(
-                                      Icons.dark_mode,
-                                      key: ValueKey('moon'),
-                                    )
-                                    : Icon(
-                                      Icons.wb_sunny,
-                                      key: ValueKey('sun'),
-                                    ),
-                          ),
-                          onPressed: widget.toggleTheme,
                         ),
                       ],
-                    ),
-                    SizedBox(height: 16),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: "Search",
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.search),
-                        ],
-                      ),
                     ),
                   ],
                 ),
               ),
             ),
             SizedBox(height: 12),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.purple[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Image.network(
-                    "https://cdn-icons-png.flaticon.com/512/4712/4712027.png",
-                    height: 60,
-                    width: 60,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  fadeTransition(
+                    ModeSelectionPage(onOpenSettings: widget.onOpenSettings),
                   ),
-                  SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Chatbot",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                );
+              },
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 220,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC1E1C1),
+                      borderRadius: BorderRadius.circular(36),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 24,
+                          offset: Offset(0, 10),
                         ),
-                      ),
-                      Text("Your virtual assistant"),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Large bot image on the left, overlapping the card edge
+                        Container(
+                          height: 220,
+                          width: 160,
+                          alignment: Alignment.centerLeft,
+                          child: OverflowBox(
+                            maxHeight: 240,
+                            maxWidth: 200,
+                            alignment: Alignment.centerLeft,
+                            child: Image.network(
+                              'https://cqfwjwrhhcctazigevno.supabase.co/storage/v1/object/public/assets//3D-Hello-GIF-by-L3S-Research-C-unscreen.gif',
+                              height: 200,
+                              width: 200,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(32, 36, 32, 36),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "I'm here to listen",
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    letterSpacing: 1.1,
+                                    height: 1.1,
+                                    shadows: [
+                                      Shadow(
+                                        color: isDark ? Colors.black26 : Colors.white70,
+                                        blurRadius: 6,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  "Your AI companion",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.blue[100] : Colors.blue[700],
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.blueGrey[700] : Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.chat_bubble_outline, color: isDark ? Colors.white : Colors.blueAccent, size: 24),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        "Chat",
+                                        style: TextStyle(
+                                          color: isDark ? Colors.white : Colors.blueAccent,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 17,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -335,7 +372,7 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
         height: 60.0,
-        color: Colors.lightGreen,
+        color: isDark ? const Color(0xFF223D1B) : Colors.lightGreen,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 300),
         items: const <Widget>[

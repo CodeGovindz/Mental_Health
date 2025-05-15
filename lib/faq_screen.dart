@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FAQScreen extends StatelessWidget {
+  const FAQScreen({Key? key}) : super(key: key);
+
   final List<Map<String, String>> faqs = const [
     {
       'question': 'What is this app about?',
@@ -38,48 +40,56 @@ class FAQScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : null;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     return Scaffold(
       appBar: AppBar(
         title: const Text('FAQs'),
-        backgroundColor: Colors.lightGreen[100],
-        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
         elevation: 0,
       ),
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            decoration: isDark
+                ? const BoxDecoration(color: Color(0xFF1B2B1A))
+                : const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+          ),
+          if (!isDark) ...[
+            Positioned(
+              top: -40,
+              left: -40,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.lightGreen[100]?.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: -40,
-            left: -40,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.lightGreen[100]?.withOpacity(0.3),
-                shape: BoxShape.circle,
+            Positioned(
+              bottom: -30,
+              right: -30,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.brown[100]?.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -30,
-            right: -30,
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.brown[100]?.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+          ],
           ListView.separated(
             padding: const EdgeInsets.all(24),
             itemCount: faqs.length,
@@ -88,20 +98,21 @@ class FAQScreen extends StatelessWidget {
               final faq = faqs[index];
               return Card(
                 elevation: 4,
+                color: cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: ExpansionTile(
                   title: Text(
                     faq['question']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor),
                   ),
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Text(
                         faq['answer']!,
-                        style: const TextStyle(fontSize: 15, color: Colors.black87),
+                        style: TextStyle(fontSize: 15, color: textColor.withOpacity(0.85)),
                       ),
                     ),
                   ],

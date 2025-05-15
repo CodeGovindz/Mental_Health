@@ -9,16 +9,11 @@ import 'package:flutter/services.dart';
 import 'edit_profile.dart';
 import 'package:http/http.dart' as http;
 import 'faq_screen.dart';
+import 'settings_screen.dart';
 
 class AccountPage extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback toggleTheme;
-
-  const AccountPage({
-    Key? key,
-    required this.isDarkMode,
-    required this.toggleTheme,
-  }) : super(key: key);
+  final VoidCallback onOpenSettings;
+  const AccountPage({Key? key, required this.onOpenSettings}) : super(key: key);
 
   @override
   State<AccountPage> createState() => _AccountPageState();
@@ -87,7 +82,9 @@ class _AccountPageState extends State<AccountPage> {
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (_) => SignInPage(onSignInSuccess: () {}),
+            builder: (_) => SignInPage(
+              onSignInSuccess: () {},
+            ),
           ),
           (route) => false,
         );
@@ -136,7 +133,9 @@ class _AccountPageState extends State<AccountPage> {
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (_) => SignInPage(onSignInSuccess: () {}),
+              builder: (_) => SignInPage(
+                onSignInSuccess: () {},
+              ),
             ),
             (route) => false,
           );
@@ -222,19 +221,8 @@ class _AccountPageState extends State<AccountPage> {
       Navigator.pushReplacement(
         context,
         fadeTransition(
-          HomePage(
-            isDarkMode: widget.isDarkMode,
-            toggleTheme: widget.toggleTheme,
-          ),
+          HomePage(onOpenSettings: widget.onOpenSettings),
         ),
-        // context,
-        // MaterialPageRoute(
-        //   builder:
-        //       (context) => HomePage(
-        //         isDarkMode: widget.isDarkMode,
-        //         toggleTheme: widget.toggleTheme,
-        //       ),
-        // ),
       );
     } else if (index == 1) {
       // Navigator.pushReplacementNamed(context, '/chat');
@@ -251,19 +239,30 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
+  void _navigateToSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => SettingsScreen(onToggleTheme: widget.onOpenSettings)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : null;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.lightGreen[100],
-        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
     );
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1B2B1A) : Colors.white,
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
         height: 60.0,
-        color: Colors.lightGreen,
+        color: isDark ? const Color(0xFF223D1B) : Colors.lightGreen,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 300),
         items: const <Widget>[
@@ -275,41 +274,44 @@ class _AccountPageState extends State<AccountPage> {
         onTap: _onNavTap,
       ),
       body: Stack(
-        children: [
-          // Decorative background
+          children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            decoration: isDark
+                ? const BoxDecoration(color: Color(0xFF1B2B1A))
+                : const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+          ),
+          if (!isDark) ...[
+            Positioned(
+              top: -60,
+              left: -60,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.lightGreen[100]?.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: -60,
-            left: -60,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.lightGreen[100]?.withOpacity(0.4),
-                shape: BoxShape.circle,
+            Positioned(
+              bottom: -40,
+              right: -40,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.brown[100]?.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -40,
-            right: -40,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.brown[100]?.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+          ],
           SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -322,11 +324,11 @@ class _AccountPageState extends State<AccountPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(28),
                       ),
-                      color: Colors.white,
+                      color: cardColor,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
-                        child: Row(
-                          children: [
+                child: Row(
+                  children: [
                             Container(
                               width: 56,
                               height: 56,
@@ -342,41 +344,42 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                               child: (_avatarUrl == null || _avatarUrl!.isEmpty)
                                   ? Center(
-                                      child: Text(
-                                        _isLoading
-                                            ? '?'
-                                            : _userName.isNotEmpty
-                                                ? _userName[0].toUpperCase()
-                                                : 'U',
-                                        style: const TextStyle(
+                      child: Text(
+                        _isLoading
+                            ? '?'
+                            : _userName.isNotEmpty
+                            ? _userName[0].toUpperCase()
+                            : 'U',
+                        style: const TextStyle(
                                           fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                                     )
                                   : null,
-                            ),
+                    ),
                             const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _isLoading ? 'Loading...' : _userName,
-                                    style: const TextStyle(
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _isLoading ? 'Loading...' : _userName,
+                                    style: TextStyle(
                                       fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              fontWeight: FontWeight.bold,
+                                      color: textColor,
+                            ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                  ),
+                          ),
                                   const SizedBox(height: 4),
-                                  Text(
-                                    _isLoading ? '' : _userEmail,
-                                    style: TextStyle(
+                          Text(
+                            _isLoading ? '' : _userEmail,
+                            style: TextStyle(
                                       fontSize: 15,
-                                      color: Colors.grey[700],
+                                      color: isDark ? Colors.white70 : Colors.grey[700],
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -386,100 +389,85 @@ class _AccountPageState extends State<AccountPage> {
                                       padding: const EdgeInsets.only(top: 6.0),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.cake_outlined, size: 18, color: Colors.brown),
+                                          Icon(Icons.cake_outlined, size: 18, color: isDark ? Colors.white70 : Colors.brown),
                                           const SizedBox(width: 6),
                                           Text(
                                             '${_userDob!.day.toString().padLeft(2, '0')}-${_userDob!.month.toString().padLeft(2, '0')}-${_userDob!.year}',
                                             style: TextStyle(
                                               fontSize: 15,
-                                              color: Colors.brown[700],
+                                              color: isDark ? Colors.white70 : Colors.brown[700],
                                               fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
                             ),
-                            IconButton(
-                              icon: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 400),
-                                transitionBuilder:
-                                    (child, animation) => RotationTransition(
-                                      turns: animation,
-                                      child: child,
-                                    ),
-                                child: widget.isDarkMode
-                                    ? const Icon(
-                                        Icons.dark_mode,
-                                        key: ValueKey('moon'),
-                                      )
-                                    : const Icon(
-                                        Icons.wb_sunny,
-                                        key: ValueKey('sun'),
-                                      ),
-                              ),
-                              onPressed: widget.toggleTheme,
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
+                                ],
+                                ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
                   ),
                   // Options List
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                children: [
                         _optionCard(
                           icon: Icons.edit,
                           label: 'Edit Profile',
                           onTap: _navigateToEditProfile,
-                          color: Colors.lightGreen[100],
-                        ),
+                          color: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+                          textColor: textColor,
+                  ),
                         const SizedBox(height: 16),
                         _optionCard(
                           icon: Icons.settings,
                           label: 'Settings',
-                          onTap: () {},
-                          color: Colors.blueGrey[50],
-                        ),
+                          onTap: _navigateToSettings,
+                          color: isDark ? const Color(0xFF223D1B) : Colors.blueGrey[50],
+                          textColor: textColor,
+                  ),
                         const SizedBox(height: 16),
                         _optionCard(
                           icon: Icons.help_outline,
                           label: 'FAQ',
                           onTap: _navigateToFAQ,
-                          color: Colors.amber[50],
+                          color: isDark ? const Color(0xFF223D1B) : Colors.amber[50],
+                          textColor: textColor,
                         ),
                         const SizedBox(height: 16),
                         _optionCard(
                           icon: Icons.logout,
                           label: 'Log Out',
-                          onTap: _signOut,
-                          color: Colors.orange[50],
+                    onTap: _signOut,
+                          color: isDark ? const Color(0xFF223D1B) : Colors.orange[50],
+                          textColor: textColor,
                         ),
                         const SizedBox(height: 16),
                         _optionCard(
                           icon: Icons.delete,
                           label: 'Delete Account',
                           onTap: _showDeleteAccountDialog,
-                          color: Colors.red[50],
-                        ),
-                      ],
+                          color: isDark ? const Color(0xFF223D1B) : Colors.red[50],
+                          textColor: textColor,
+                  ),
+                ],
                     ),
                   ),
                   const SizedBox(height: 32),
                 ],
               ),
+              ),
             ),
-          ),
-        ],
+          ],
       ),
     );
   }
 
-  Widget _optionCard({required IconData icon, required String label, required VoidCallback onTap, Color? color}) {
+  Widget _optionCard({required IconData icon, required String label, required VoidCallback onTap, Color? color, Color? textColor}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -487,13 +475,13 @@ class _AccountPageState extends State<AccountPage> {
       ),
       color: color ?? Colors.white,
       child: ListTile(
-        leading: Icon(icon, size: 28, color: Colors.brown[700]),
+        leading: Icon(icon, size: 28, color: textColor ?? Colors.brown[700]),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: textColor),
         ),
         onTap: onTap,
-        trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: textColor?.withOpacity(0.7) ?? Colors.grey),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),

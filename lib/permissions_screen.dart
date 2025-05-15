@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 
 class PermissionsScreen extends StatefulWidget {
   final VoidCallback onPermissionsGranted;
-  
   const PermissionsScreen({Key? key, required this.onPermissionsGranted}) : super(key: key);
 
   @override
@@ -139,8 +138,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : Colors.white;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF3A2713);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        title: const Text('App Permissions'),
+        backgroundColor: isDark ? const Color(0xFF223D1B) : null,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
+        elevation: 0,
+      ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator(color: Colors.green))
         : SafeArea(
@@ -155,8 +164,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   Center(
                     child: Container(
                       padding: const EdgeInsets.all(15),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF223D1B) : Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
                       ),
@@ -167,12 +176,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   const SizedBox(height: 40),
                   
                   // Title
-                  const Text(
+                  Text(
                     "App Permissions",
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3A2713),
+                      color: textColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -180,11 +189,11 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   const SizedBox(height: 20),
                   
                   // Description
-                  const Text(
+                  Text(
                     "मनन needs the following permissions to provide you with the best experience:",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white70 : Colors.black87,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -198,6 +207,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     icon: Icons.camera_alt_outlined,
                     isGranted: _isCameraGranted,
                     onRequest: _requestCameraPermission,
+                    isDark: isDark,
                   ),
                   
                   PermissionItem(
@@ -206,6 +216,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     icon: Icons.mic_outlined,
                     isGranted: _isMicrophoneGranted,
                     onRequest: _requestMicrophonePermission,
+                    isDark: isDark,
                   ),
                   
                   PermissionItem(
@@ -214,6 +225,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     icon: Icons.folder_outlined,
                     isGranted: _isStorageGranted,
                     onRequest: _requestStoragePermission,
+                    isDark: isDark,
                   ),
                   
                   PermissionItem(
@@ -222,6 +234,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     icon: Icons.notifications_outlined,
                     isGranted: _isNotificationGranted,
                     onRequest: _requestNotificationPermission,
+                    isDark: isDark,
                   ),
                   
                   const Spacer(),
@@ -259,10 +272,10 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         );
                       }
                     },
-                    child: const Text(
+                    child: Text(
                       "Continue",
                       style: TextStyle(
-                        color: Color(0xFF3A2713),
+                        color: textColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -282,6 +295,7 @@ class PermissionItem extends StatelessWidget {
   final IconData icon;
   final bool isGranted;
   final VoidCallback onRequest;
+  final bool isDark;
 
   const PermissionItem({
     Key? key,
@@ -290,6 +304,7 @@ class PermissionItem extends StatelessWidget {
     required this.icon,
     required this.isGranted,
     required this.onRequest,
+    required this.isDark,
   }) : super(key: key);
 
   @override
@@ -301,12 +316,12 @@ class PermissionItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isGranted ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              color: isGranted ? Colors.green.withOpacity(0.1) : (isDark ? Colors.white10 : Colors.grey.withOpacity(0.1)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: isGranted ? Colors.green : Colors.grey,
+              color: isGranted ? Colors.green : (isDark ? Colors.white : Colors.grey),
               size: 24,
             ),
           ),
@@ -317,16 +332,17 @@ class PermissionItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
                 Text(
                   description,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: isDark ? Colors.white70 : Colors.grey[600],
                   ),
                 ),
               ],

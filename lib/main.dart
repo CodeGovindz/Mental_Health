@@ -83,8 +83,7 @@ class _MyAppState extends State<MyApp> {
     _navigatorKey.currentState?.pushReplacement(
       MaterialPageRoute(
         builder: (context) => HomePage(
-          isDarkMode: _isDarkMode,
-          toggleTheme: _toggleTheme,
+          onOpenSettings: _toggleTheme,
         ),
       ),
     );
@@ -176,22 +175,50 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final baseTheme = _isDarkMode ? ThemeData.dark() : ThemeData.light();
+    final ThemeData lightTheme = ThemeData.light().copyWith(
+      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF9CB36B),
+        iconTheme: IconThemeData(color: Colors.black),
+        titleTextStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+        elevation: 0,
+      ),
+      cardColor: Colors.white,
+      textTheme: GoogleFonts.urbanistTextTheme(ThemeData.light().textTheme),
+    );
+    final ThemeData darkTheme = ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: const Color(0xFF1B2B1A), // dark green
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF223D1B), // darker green
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        elevation: 0,
+      ),
+      cardColor: const Color(0xFF223D1B),
+      textTheme: GoogleFonts.urbanistTextTheme(ThemeData.dark().textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white)),
+      colorScheme: ThemeData.dark().colorScheme.copyWith(
+        primary: const Color(0xFF9CB36B),
+        secondary: Colors.tealAccent,
+        background: const Color(0xFF1B2B1A),
+        surface: const Color(0xFF223D1B),
+        onBackground: Colors.white,
+        onSurface: Colors.white,
+      ),
+    );
 
     return MaterialApp(
       navigatorKey: _navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'मनन Mental Health App',
-      theme: baseTheme.copyWith(
-        textTheme: GoogleFonts.urbanistTextTheme(baseTheme.textTheme),
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Builder(
         builder: (context) {
           // First check if we've gone through permissions flow
           if (!_permissionsChecked) {
             return PermissionsScreen(onPermissionsGranted: _onPermissionsGranted);
           }
-          
           // If permissions are checked, proceed with normal auth flow
           return SignInPage(
               onSignInSuccess: () {

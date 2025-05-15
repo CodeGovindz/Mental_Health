@@ -12,12 +12,10 @@ import 'package:audio_session/audio_session.dart';
 import 'package:intl/intl.dart'; // <-- Add this for date formatting
 
 class VideoQuestionnairePage extends StatefulWidget {
-  final bool isDarkMode;
   final VoidCallback toggleTheme;
 
   const VideoQuestionnairePage({
     super.key,
-    required this.isDarkMode,
     required this.toggleTheme,
   });
 
@@ -238,9 +236,10 @@ class _VideoQuestionnairePageState extends State<VideoQuestionnairePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isLastQuestion = currentIndex >= questions.length;
-    final themeColor = widget.isDarkMode ? Colors.black : Colors.white;
-    final textColor = widget.isDarkMode ? Colors.white : Colors.black;
+    final themeColor = isDark ? Colors.black : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
 
     return Scaffold(
       backgroundColor: themeColor,
@@ -254,7 +253,7 @@ class _VideoQuestionnairePageState extends State<VideoQuestionnairePage> {
                   (child, animation) =>
                       RotationTransition(turns: animation, child: child),
               child:
-                  widget.isDarkMode
+                  isDark
                       ? const Icon(Icons.dark_mode, key: ValueKey('dark'))
                       : const Icon(Icons.wb_sunny, key: ValueKey('light')),
             ),
@@ -275,7 +274,7 @@ class _VideoQuestionnairePageState extends State<VideoQuestionnairePage> {
                             margin: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color:
-                                  widget.isDarkMode
+                                  isDark
                                       ? Colors.grey[800]
                                       : Colors.green[100],
                               borderRadius: BorderRadius.circular(20),

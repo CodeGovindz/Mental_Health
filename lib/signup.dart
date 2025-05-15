@@ -542,13 +542,12 @@ class _SignUpPageState extends State<SignUpPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder:
-                            (context) => SignInPage(
-                              onSignInSuccess: () {
-                                // This will be handled by the main app when actually signing in
-                                Navigator.pop(context);
-                              },
-                            ),
+                        builder: (context) => SignInPage(
+                          onSignInSuccess: () {
+                            // This will be handled by the main app when actually signing in
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
                     );
                   },

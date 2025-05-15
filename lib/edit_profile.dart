@@ -131,50 +131,61 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : null;
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final hintColor = isDark ? Colors.white70 : Colors.grey[600];
+    final borderColor = isDark ? Colors.white24 : Colors.black12;
     return Scaffold(
+      backgroundColor: bgColor ?? Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: isDark ? const Color(0xFF223D1B) : Colors.transparent,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
         elevation: 0,
       ),
       body: Stack(
         children: [
           // Decorative background
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            decoration: isDark
+                ? const BoxDecoration(color: Color(0xFF1B2B1A))
+                : const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF9CB36B), Color(0xFFF5F5F5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+          ),
+          if (!isDark) ...[
+            Positioned(
+              top: -60,
+              left: -60,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.lightGreen[100]?.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: -60,
-            left: -60,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.lightGreen[100]?.withOpacity(0.4),
-                shape: BoxShape.circle,
+            Positioned(
+              bottom: -40,
+              right: -40,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.brown[100]?.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -40,
-            right: -40,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.brown[100]?.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+          ],
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Form(
@@ -196,7 +207,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             width: 90,
                             height: 90,
                             decoration: BoxDecoration(
-                              color: Colors.brown[100],
+                              color: isDark ? const Color(0xFF223D1B) : Colors.brown[100],
                               borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
@@ -218,7 +229,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       : null,
                             ),
                             child: (_pickedImage == null && (_avatarUrl == null || _avatarUrl!.isEmpty))
-                                ? Icon(Icons.person, size: 48, color: Colors.brown[300])
+                                ? Icon(Icons.person, size: 48, color: isDark ? Colors.white24 : Colors.brown[300])
                                 : null,
                           ),
                           Positioned(
@@ -243,11 +254,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     const SizedBox(height: 24),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: borderColor!,
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
@@ -255,9 +266,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       child: TextFormField(
                         controller: _firstNameController,
-                        decoration: const InputDecoration(
+                        style: TextStyle(color: textColor),
+                        decoration: InputDecoration(
                           labelText: 'First Name',
-                          prefixIcon: Icon(Icons.person_outline),
+                          labelStyle: TextStyle(color: hintColor),
+                          prefixIcon: Icon(Icons.person_outline, color: hintColor),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         ),
@@ -267,11 +280,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     const SizedBox(height: 20),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: borderColor!,
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
@@ -279,9 +292,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       child: TextFormField(
                         controller: _lastNameController,
-                        decoration: const InputDecoration(
+                        style: TextStyle(color: textColor),
+                        decoration: InputDecoration(
                           labelText: 'Last Name',
-                          prefixIcon: Icon(Icons.person),
+                          labelStyle: TextStyle(color: hintColor),
+                          prefixIcon: Icon(Icons.person, color: hintColor),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         ),
@@ -291,11 +306,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     const SizedBox(height: 20),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: borderColor!,
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
@@ -304,9 +319,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: TextFormField(
                         initialValue: _email,
                         readOnly: true,
-                        decoration: const InputDecoration(
+                        style: TextStyle(color: textColor),
+                        decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          labelStyle: TextStyle(color: hintColor),
+                          prefixIcon: Icon(Icons.email_outlined, color: hintColor),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         ),
@@ -317,11 +334,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onTap: _pickDateOfBirth,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black12,
+                              color: borderColor!,
                               blurRadius: 8,
                               offset: Offset(0, 4),
                             ),
@@ -330,7 +347,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                         child: Row(
                           children: [
-                            const Icon(Icons.cake_outlined, color: Colors.brown),
+                            Icon(Icons.cake_outlined, color: isDark ? Colors.white70 : Colors.brown),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
@@ -338,12 +355,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     ? 'Select Date of Birth'
                                     : 'DOB: ${_selectedDob!.day.toString().padLeft(2, '0')}-${_selectedDob!.month.toString().padLeft(2, '0')}-${_selectedDob!.year}',
                                 style: TextStyle(
-                                  color: _selectedDob == null ? Colors.grey[600] : Colors.brown[800],
+                                  color: _selectedDob == null ? hintColor : (isDark ? Colors.white : Colors.brown[800]),
                                   fontSize: 16,
                                 ),
                               ),
                             ),
-                            const Icon(Icons.calendar_today, color: Colors.brown),
+                            Icon(Icons.calendar_today, color: isDark ? Colors.white70 : Colors.brown),
                           ],
                         ),
                       ),
@@ -352,7 +369,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ElevatedButton(
                       onPressed: _isLoading ? null : _saveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightGreen,
+                        backgroundColor: isDark ? const Color(0xFF223D1B) : Colors.lightGreen,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

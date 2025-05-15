@@ -94,10 +94,7 @@ class _SignInPageState extends State<SignInPage> {
           // Navigate to HomePage and clear the stack
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => HomePage(
-                isDarkMode: false, // You can pass the correct value if needed
-                toggleTheme: () {}, // You can pass the correct function if needed
-              ),
+              builder: (context) => HomePage(onOpenSettings: () {}),
             ),
             (route) => false,
           );
@@ -120,14 +117,23 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF1B2B1A) : const Color(0xFFF5F5F5);
+    final cardColor = isDark ? const Color(0xFF223D1B) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.brown.shade800;
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.lightGreen[100],
-        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: isDark ? const Color(0xFF223D1B) : Colors.lightGreen[100],
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
     );
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF223D1B) : Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -136,9 +142,9 @@ class _SignInPageState extends State<SignInPage> {
               children: [
                 Container(
                   height: 200,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF9CB36B),
-                    borderRadius: BorderRadius.only(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF223D1B) : const Color(0xFF9CB36B),
+                    borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(100),
                       bottomRight: Radius.circular(100),
                     ),
@@ -146,8 +152,8 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.all(15),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF223D1B) : Colors.white,
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset('assets/logo.png', width: 60, height: 60),
@@ -161,7 +167,7 @@ class _SignInPageState extends State<SignInPage> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.brown.shade800,
+                  color: textColor,
                 ),
               ),
             ),
